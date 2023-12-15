@@ -9,4 +9,5 @@ public interface OrderRepository extends CrudRepository<Order, Long> {
 
     List<Order> findAllByDeliveryDateAndDestination_nameContainingIgnoreCase(Long deliveryDate, String destination);
 
+    List<Order> findAllByDeliveryDate(Long deliveryDate);
 }

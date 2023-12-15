@@ -3,6 +3,8 @@ package com.betfair.logistics.dao.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import static com.betfair.logistics.dao.entity.OrderStatus.allowedTransitions;
+
 @Entity
 @Table(name = "orders")
 @Getter
@@ -27,4 +29,13 @@ public class Order {
     @JoinColumn(name = "destination_id")
     Destination destination;
 
+    public boolean changeOrderStatus(OrderStatus newStatus) {
+
+        if (allowedTransitions.get(this.orderStatus).contains(newStatus)) {
+            this.orderStatus = newStatus;
+            return true;
+        }
+        return false;
+
+    }
 }

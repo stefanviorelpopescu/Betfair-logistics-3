@@ -15,8 +15,17 @@ public class CompanyInfo {
     public static DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_DATE;
     public static Long MILLIS_IN_A_DAY = 24 * 3600 * 1000L;
 
-    private Long currentDate = LocalDate.of(2021, 12, 15).toEpochDay() * MILLIS_IN_A_DAY;
+    private Long currentDate = LocalDate.of(2021, 12, 14).toEpochDay() * MILLIS_IN_A_DAY;
     private Long companyProfit = 0L;
+
+    public Long advanceCurrentDate() {
+        currentDate += MILLIS_IN_A_DAY;
+        return currentDate;
+    }
+
+    public void increaseProfit(Long delta) {
+        companyProfit += delta;
+    }
 
     public String getCurrentDateAsString() {
         return LocalDate.ofEpochDay(currentDate / MILLIS_IN_A_DAY).format(DATE_FORMATTER);

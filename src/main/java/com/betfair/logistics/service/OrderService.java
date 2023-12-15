@@ -2,7 +2,6 @@ package com.betfair.logistics.service;
 
 import com.betfair.logistics.dao.entity.Destination;
 import com.betfair.logistics.dao.entity.Order;
-import com.betfair.logistics.dao.entity.OrderStatus;
 import com.betfair.logistics.dao.repository.DestinationRepository;
 import com.betfair.logistics.dao.repository.OrderRepository;
 import com.betfair.logistics.dto.OrderCreateDto;
@@ -16,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.betfair.logistics.dao.entity.OrderStatus.CANCELED;
-import static com.betfair.logistics.dao.entity.OrderStatus.DELIVERED;
 
 @Service
 public class OrderService {
@@ -33,16 +31,8 @@ public class OrderService {
 
     public void cancelOrders(List<Long> orderIds) {
         Iterable<Order> foundOrders = orderRepository.findAllById(orderIds);
-        foundOrders.forEach(order -> changeOrderStatus(order, CANCELED));
+        foundOrders.forEach(order -> order.changeOrderStatus(CANCELED));
         orderRepository.saveAll(foundOrders);
-    }
-
-    private void changeOrderStatus(Order order, OrderStatus newStatus) {
-        if (newStatus == CANCELED) {
-            if (order.getOrderStatus() != DELIVERED) {
-                order.setOrderStatus(CANCELED);
-            }
-        }
     }
 
     public List<OrderDto> addOrders(List<OrderCreateDto> orderCreateDtos) {
