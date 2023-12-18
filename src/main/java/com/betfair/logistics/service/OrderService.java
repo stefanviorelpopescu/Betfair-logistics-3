@@ -1,5 +1,6 @@
 package com.betfair.logistics.service;
 
+import com.betfair.logistics.dao.cache.DestinationCache;
 import com.betfair.logistics.dao.entity.Destination;
 import com.betfair.logistics.dao.entity.Order;
 import com.betfair.logistics.dao.repository.DestinationRepository;
@@ -21,12 +22,12 @@ public class OrderService {
 
     private final CompanyInfo companyInfo;
     private final OrderRepository orderRepository;
-    private final DestinationRepository destinationRepository;
+    private final DestinationCache destinationCache;
 
-    public OrderService(CompanyInfo companyInfo, OrderRepository orderRepository, DestinationRepository destinationRepository) {
+    public OrderService(CompanyInfo companyInfo, OrderRepository orderRepository, DestinationCache destinationCache) {
         this.companyInfo = companyInfo;
         this.orderRepository = orderRepository;
-        this.destinationRepository = destinationRepository;
+        this.destinationCache = destinationCache;
     }
 
     public void cancelOrders(List<Long> orderIds) {
@@ -39,7 +40,7 @@ public class OrderService {
         List<Order> ordersToSave = new ArrayList<>();
         for (OrderCreateDto orderCreateDto : orderCreateDtos) {
             if (isDtoValid(orderCreateDto)) {
-                Optional<Destination> optional = destinationRepository.findById(orderCreateDto.getDestinationId());
+                Optional<Destination> optional = destinationCache.getDestination(orderCreateDto.getDestinationId());
                 optional.ifPresent(destination -> {
                     Order order = OrderConverter.orderCreateDtoToEntity(orderCreateDto, destination);
                     ordersToSave.add(order);

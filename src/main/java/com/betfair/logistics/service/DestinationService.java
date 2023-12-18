@@ -1,5 +1,6 @@
 package com.betfair.logistics.service;
 
+import com.betfair.logistics.dao.cache.DestinationCache;
 import com.betfair.logistics.dao.entity.Destination;
 import com.betfair.logistics.dao.repository.DestinationRepository;
 import com.betfair.logistics.dto.DestinationCreateDto;
@@ -17,17 +18,20 @@ import java.util.Optional;
 public class DestinationService {
 
     private final DestinationRepository destinationRepository;
+    private final DestinationCache destinationCache;
 
-    public DestinationService(DestinationRepository destinationRepository) {
+    public DestinationService(DestinationRepository destinationRepository, DestinationCache destinationCache) {
         this.destinationRepository = destinationRepository;
+        this.destinationCache = destinationCache;
     }
 
     public void deleteDestination(Long id) {
         destinationRepository.deleteById(id);
+        destinationCache.removeEntry(id);
     }
 
     public Optional<DestinationDto> getDestinationById(Long id) {
-        Optional<Destination> optionalDestination = destinationRepository.findById(id);
+        Optional<Destination> optionalDestination = destinationCache.getDestination(id);
         return optionalDestination.map(DestinationConverter::destinationToDestinationDto);
     }
 
@@ -39,6 +43,7 @@ public class DestinationService {
 
         try {
             destinationRepository.save(destination);
+            destinationCache.updateEntry(destination);
         } catch (DataIntegrityViolationException e) {
             throw new InvalidDestinationDtoException(String.format("Provided name:[%s] already exists", destinationDto.getName()));
         }
@@ -48,7 +53,7 @@ public class DestinationService {
 
     public DestinationDto editDestination(DestinationDto destinationDto) throws InvalidDestinationDtoException {
 
-        Destination foundDestination = destinationRepository.findById(destinationDto.getId())
+        Destination foundDestination = destinationCache.getDestination(destinationDto.getId())
                 .orElseThrow(() -> new InvalidDestinationDtoException("Provided ID does not exist"));
 
         foundDestination.setName(destinationDto.getName());
@@ -56,6 +61,7 @@ public class DestinationService {
 
         try {
             destinationRepository.save(foundDestination);
+            destinationCache.updateEntry(foundDestination);
         } catch (DataIntegrityViolationException e) {
             throw new InvalidDestinationDtoException(String.format("Provided name:[%s] already exists", destinationDto.getName()));
         }
@@ -64,6 +70,6 @@ public class DestinationService {
     }
 
     public List<DestinationDto> getAllDestinations() {
-        return DestinationConverter.destinationListToDestionationDtoList(destinationRepository.findAll());
+        return DestinationConverter.destinationListToDestionationDtoList(destinationCache.getAllDestinations());
     }
 }
